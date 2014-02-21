@@ -1,5 +1,4 @@
 require 'celluloid'
-require 'reel'
 require 'celluloid/zmq'
 
 Celluloid::ZMQ.init

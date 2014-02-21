@@ -19,7 +19,6 @@ Gem::Specification.new do |gem|
 
   gem.add_runtime_dependency "celluloid",     ">= 0.15.0"
   gem.add_runtime_dependency "celluloid-zmq", ">= 0.15.0"
-  gem.add_runtime_dependency "reel"
   gem.add_runtime_dependency "celluloid-redis"
   gem.add_runtime_dependency "redis-namespace"
 
