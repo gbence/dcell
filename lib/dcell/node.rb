@@ -25,6 +25,8 @@ module DCell
     @heartbeat_rate    = 5  # How often to send heartbeats in seconds
     @heartbeat_timeout = 10 # How soon until a lost heartbeat triggers a node partition
 
+    @@receive_timeout = 1
+
     # Singleton methods
     class << self
       include Enumerable
@@ -41,6 +43,7 @@ module DCell
 
       # Total hax to accommodate the new Celluloid::FSM API
       attach self
+      transition :disconnected
     end
 
     def shutdown
@@ -61,7 +64,7 @@ module DCell
         raise
       end
 
-      transition :connected
+      send_heartbeat
       @socket
     end
 
@@ -70,8 +73,14 @@ module DCell
       request = Message::Find.new(Thread.mailbox, name)
       send_message request
 
-      response = receive do |msg|
+      response = receive(@@receive_timeout) do |msg|
         msg.respond_to?(:request_id) && msg.request_id == request.id
+      end
+
+      if response.nil?
+        tasks.select{ |t| t.type == :call && t.meta.try(:[], :method_name) == :find }.try(:terminate)
+        transition :partitioned if state == :connected
+        abort "Can not retreive actor: #{name}!"
       end
 
       abort response.value if response.is_a? ErrorResponse
@@ -84,8 +93,14 @@ module DCell
       request = Message::List.new(Thread.mailbox)
       send_message request
 
-      response = receive do |msg|
+      response = receive(@@receive_timeout) do |msg|
         msg.respond_to?(:request_id) && msg.request_id == request.id
+      end
+
+      if response.nil?
+        tasks.select{ |t| t.type == :call && t.meta.try(:[], :method_name) == :actors }.try(:terminate)
+        transition :partitioned if state == :connected
+        abort "Can not retreive actors' list!"
       end
 
       abort response.value if response.is_a? ErrorResponse
