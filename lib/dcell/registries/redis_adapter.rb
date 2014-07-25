@@ -40,6 +40,10 @@ module DCell
           @redis.hset 'nodes', node_id, addr
         end
 
+        def delete(node_id)
+          @redis.hdel 'nodes', node_id
+        end
+
         def nodes
           @redis.hkeys 'nodes'
         end
@@ -51,6 +55,7 @@ module DCell
 
       def get_node(node_id);       @node_registry.get(node_id) end
       def set_node(node_id, addr); @node_registry.set(node_id, addr) end
+      def delete_node(node_id);    @node_registry.delete(node_id) end
       def nodes;                   @node_registry.nodes end
 
       class GlobalRegistry
@@ -69,6 +74,11 @@ module DCell
           @redis.hset 'globals', key.to_s, string
         end
 
+        # Remove a global value
+        def delete(key)
+          @redis.hdel 'globals', key.to_s
+        end
+
         # The keys to all globals in the system
         def global_keys
           @redis.hkeys 'globals'
@@ -81,6 +91,7 @@ module DCell
 
       def get_global(key);        @global_registry.get(key) end
       def set_global(key, value); @global_registry.set(key, value) end
+      def delete_global(key);     @global_registry.delete(key, value) end
       def global_keys;            @global_registry.global_keys end
     end
   end

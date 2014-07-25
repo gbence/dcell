@@ -15,6 +15,11 @@ module DCell
     end
     alias_method :[]=, :set
 
+    # Remove Node ID from directory
+    def delete(node_id)
+      DCell.registry.delete_node node_id
+    end
+
     # List all of the node IDs in the directory
     def all
       DCell.registry.nodes

@@ -67,6 +67,14 @@ module DCell
         DCell::Directory.set @configuration['id'], addr
       end
 
+      # This will automagically remove the node on its shutdown.
+      me.extend(Module.new do
+        def shutdown
+          super
+          DCell::Directory.delete(@id)
+        end
+      end)
+
       me
     end
 
